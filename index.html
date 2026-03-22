@@ -108,7 +108,6 @@
         .count-badge { font-size: 10px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 10px; color: var(--text-muted); font-weight: 700; }
         .active .count-badge { background: var(--accent-primary); color: white; }
 
-        /* DATA ACTIONS */
         .data-actions { display: flex; gap: 8px; margin-top: 8px; padding: 0 8px; }
         .data-btn { 
             flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -313,9 +312,9 @@
 
         function save() { localStorage.setItem('tasks_v4_pro', JSON.stringify(todos)); }
 
-        // --- BACKUP (EXPORT/IMPORT) ---
+        // --- BACKUP ---
         function exportTasks() {
-            if (todos.length === 0) return alert("Não há tarefas para exportar.");
+            if (todos.length === 0) return;
             const data = JSON.stringify(todos, null, 2);
             const blob = new Blob([data], { type: "application/json" });
             const url = URL.createObjectURL(blob);
@@ -334,12 +333,10 @@
                 try {
                     const imported = JSON.parse(event.target.result);
                     if (Array.isArray(imported)) {
-                        if (confirm(`Deseja importar ${imported.length} tarefas? Isso substituirá sua lista atual.`)) {
-                            todos = imported;
-                            save(); render();
-                        }
-                    } else { alert("Arquivo JSON inválido."); }
-                } catch (err) { alert("Erro ao ler o arquivo."); }
+                        todos = imported;
+                        save(); render();
+                    }
+                } catch (err) { console.error("Erro importação"); }
             };
             reader.readAsText(file);
         });
@@ -376,7 +373,6 @@
 
         // --- RENDERIZAÇÃO ---
         function render() {
-            // Contadores
             const allCount = todos.length;
             const pendingCount = todos.filter(t => !t.completed).length;
             const completedCount = todos.filter(t => t.completed).length;
@@ -438,11 +434,11 @@
             document.getElementById('modal-task-name').innerText = `Deseja excluir "${task.text}"?`;
             modal.style.display = 'flex';
         }
-        document.getElementById('modal-cancel').onclick = () => { modal.style.display = 'none'; taskIdToDelete = null; };
+        document.getElementById('modal-cancel').onclick = () => { modal.style.display = 'none'; taskIdToDelete = null; input.focus(); };
         document.getElementById('modal-confirm').onclick = () => {
             if (taskIdToDelete) {
                 todos = todos.filter(t => t.id !== taskIdToDelete);
-                save(); render(); modal.style.display = 'none'; taskIdToDelete = null; selectedIndex = -1;
+                save(); render(); modal.style.display = 'none'; taskIdToDelete = null; selectedIndex = -1; input.focus();
             }
         };
 
@@ -453,6 +449,7 @@
             todos.unshift({ id: Date.now(), text, completed: false, createdAt: new Date().toISOString(), dueDate: inputDate.value || null });
             input.value = ''; inputDate.value = ''; searchTerm = ""; selectedIndex = -1;
             save(); render();
+            input.focus(); // Retorna o foco após adicionar
         }
         function toggleTodo(id) {
             todos = todos.map(t => t.id === id ? {...t, completed: !t.completed} : t);
@@ -488,8 +485,11 @@
             });
         });
 
+        // --- INICIALIZAÇÃO DEFINITIVA ---
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-        applyTheme(currentTheme); render();
+        applyTheme(currentTheme); 
+        render();
+        input.focus(); // AUTOFOCUS NO INÍCIO
     </script>
 </body>
 </html>
