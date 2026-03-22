@@ -91,7 +91,7 @@
             font-size: 20px; font-weight: 800; 
             background: linear-gradient(to right, var(--text-main), var(--accent-primary)); 
             -webkit-background-clip: text; 
-            background-clip: text; /* Correção de compatibilidade */
+            background-clip: text;
             -webkit-text-fill-color: transparent; 
         }
 
@@ -100,7 +100,6 @@
         .filter-btn:hover { background: var(--item-hover); color: var(--text-main); }
         .filter-btn.active { background: var(--accent-glow); color: var(--accent-primary); font-weight: 600; }
 
-        /* KEYBOARD HINTS */
         .shortcut-legend {
             margin-top: 20px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 8px; font-size: 10px; color: var(--text-muted);
         }
@@ -241,16 +240,13 @@
 
         function save() { localStorage.setItem('tasks_v4_pro', JSON.stringify(todos)); }
 
-        // --- BUSCA (Filtro Dinâmico) ---
+        // --- BUSCA ---
         input.addEventListener('input', (e) => {
             searchTerm = e.target.value.toLowerCase();
-            selectedIndex = -1; // Reseta seleção ao buscar
+            selectedIndex = -1;
             render();
-            
-            // Troca ícone se estiver digitando
             const icon = document.getElementById('input-icon');
-            if(searchTerm.length > 0) icon.setAttribute('data-lucide', 'filter');
-            else icon.setAttribute('data-lucide', 'search');
+            icon.setAttribute('data-lucide', searchTerm.length > 0 ? 'filter' : 'search');
             lucide.createIcons();
         });
 
@@ -279,8 +275,6 @@
         // --- RENDERIZAÇÃO ---
         function render() {
             todoList.innerHTML = '';
-            
-            // Aplica todos os filtros: Texto + Categoria (Todas/Pendentes/Concluídas)
             const filtered = todos.filter(t => {
                 const matchesSearch = t.text.toLowerCase().includes(searchTerm);
                 const matchesCategory = (currentFilter === 'all') || 
@@ -290,7 +284,7 @@
             });
 
             document.getElementById('empty-state').style.display = filtered.length ? 'none' : 'block';
-            document.getElementById('empty-text').innerText = searchTerm ? "Nenhum resultado para sua busca." : "Produtividade máxima!";
+            document.getElementById('empty-text').innerText = searchTerm ? "Nenhum resultado para sua busca." : "Tudo organizado por aqui!";
 
             filtered.forEach((t, index) => {
                 const li = document.createElement('li');
@@ -326,16 +320,8 @@
         function addTodo() {
             const text = input.value.trim();
             if (!text) return;
-            
-            // Adiciona nova tarefa
             todos.unshift({ id: Date.now(), text, completed: false, createdAt: new Date().toISOString(), dueDate: inputDate.value || null });
-            
-            // Limpa tudo após adicionar
-            input.value = ''; 
-            inputDate.value = '';
-            searchTerm = "";
-            selectedIndex = -1;
-            
+            input.value = ''; inputDate.value = ''; searchTerm = ""; selectedIndex = -1;
             save(); render();
         }
 
@@ -345,6 +331,12 @@
         }
 
         function deleteTodo(id) {
+            const taskToDelete = todos.find(t => t.id === id);
+            if (!taskToDelete) return;
+
+            // CONFIRMAÇÃO AO APAGAR
+            if (!confirm(`Deseja realmente excluir a tarefa: "${taskToDelete.text}"?`)) return;
+
             todos = todos.filter(t => t.id !== id);
             selectedIndex = -1;
             save(); render();
@@ -384,7 +376,7 @@
             });
         });
 
-        // Init
+        // Inicialização
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
         applyTheme(currentTheme);
         render();
