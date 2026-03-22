@@ -23,13 +23,15 @@
             --accent-glow: rgba(59, 130, 246, 0.3);
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
-            --text-purple: #60a5fa; /* Usado para variações de cor do texto */
+            --text-purple: #60a5fa; 
             --border: rgba(255, 255, 255, 0.1);
             --item-hover: rgba(255, 255, 255, 0.05);
             --radius-lg: 16px;
             --radius-md: 10px;
             --card-bg: rgba(255, 255, 255, 0.03);
             --input-bg: rgba(0, 0, 0, 0.2);
+            --danger: #ef4444;
+            --warning: #f59e0b;
         }
 
         /* TEMA LIGHT (CLARO) */
@@ -127,7 +129,7 @@
             letter-spacing: -0.5px;
             background: linear-gradient(to right, var(--text-main), var(--accent-primary));
             -webkit-background-clip: text;
-            background-clip: text; /* Correção de compatibilidade */
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -238,7 +240,6 @@
             gap: 12px;
         }
 
-        /* Botão Mudar Tema */
         .theme-toggle-btn {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -252,11 +253,6 @@
             font-size: 12px;
             font-weight: 500;
             transition: all 0.2s;
-        }
-
-        .theme-toggle-btn:hover {
-            border-color: var(--accent-primary);
-            background: var(--item-hover);
         }
 
         /* Área de Input */
@@ -280,7 +276,7 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        .input-container input {
+        .input-container input[type="text"] {
             flex: 1;
             background: transparent;
             border: none;
@@ -288,6 +284,17 @@
             color: var(--text-main);
             font-size: 16px;
             padding: 12px 0;
+        }
+
+        .input-container input[type="date"] {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            padding: 8px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
         }
 
         .btn-add {
@@ -304,20 +311,11 @@
             gap: 8px;
         }
 
-        .btn-add:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.1);
-        }
-
         /* Lista de Tarefas */
         .content-scroll {
             flex: 1;
             overflow-y: auto;
             padding: 0 48px 40px;
-        }
-
-        .todo-list {
-            list-style: none;
         }
 
         .todo-item {
@@ -331,11 +329,6 @@
             gap: 16px;
             transition: all 0.2s;
             animation: slideUp 0.4s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .todo-item:hover {
@@ -353,6 +346,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
 
         .todo-item.completed .checkbox {
@@ -373,18 +367,40 @@
 
         .task-content {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .task-title {
             font-size: 15px;
             font-weight: 500;
             color: var(--text-main);
-            transition: all 0.2s;
         }
 
         .todo-item.completed .task-title {
             color: var(--text-muted);
             text-decoration: line-through;
+        }
+
+        /* INFO DE DATAS */
+        .task-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .meta-item {
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+        }
+
+        .meta-item.due-soon {
+            color: var(--warning);
+            font-weight: 600;
         }
 
         .task-actions {
@@ -413,42 +429,24 @@
             color: white;
         }
 
-        .action-btn.del:hover {
-            background: #ef4444;
-        }
+        .action-btn.del:hover { background: var(--danger); }
 
-        .action-btn.edit:hover {
-            background: #3b82f6; 
-        }
-
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 80px 0;
             color: var(--text-muted);
         }
 
-        /* Responsividade */
         @media (max-width: 950px) {
-            .dashboard-container {
-                grid-template-columns: 1fr;
-                height: 95vh;
-            }
-            aside {
-                display: none;
-            }
-            header, .input-section, .content-scroll {
-                padding-left: 24px;
-                padding-right: 24px;
-            }
+            .dashboard-container { grid-template-columns: 1fr; height: 95vh; }
+            aside { display: none; }
+            header, .input-section, .content-scroll { padding-left: 24px; padding-right: 24px; }
+            .input-container { flex-wrap: wrap; }
+            .input-container input[type="text"] { width: 100%; flex: none; }
         }
 
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent-primary);
-            border-radius: 10px;
-        }
+        ::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -499,51 +497,44 @@
                 </div>
                 
                 <div class="header-actions">
-                    <!-- BOTÃO DE TEMA -->
-                    <button class="theme-toggle-btn" id="theme-toggle" title="Alternar Tema">
+                    <button class="theme-toggle-btn" id="theme-toggle">
                         <i data-lucide="sun" id="theme-icon" size="16"></i>
                         <span id="theme-name">Modo Claro</span>
                     </button>
-
-                    <div class="user-pill" style="display: flex; align-items: center; gap: 10px; background: var(--card-bg); padding: 6px 14px; border-radius: 20px; font-size: 13px; border: 1px solid var(--border);">
-                        <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
-                        Workspace Ativa
-                    </div>
                 </div>
             </header>
 
             <section class="input-section">
                 <div class="input-container">
-                    <i data-lucide="search" size="18" color="#94a3b8"></i>
-                    <input type="text" id="todo-input" placeholder="Adicionar nova tarefa..." autocomplete="off">
+                    <i data-lucide="plus-circle" size="18" color="#94a3b8"></i>
+                    <input type="text" id="todo-input" placeholder="O que precisa ser feito?" autocomplete="off">
+                    
+                    <!-- INPUT DE DATA (OPCIONAL) -->
+                    <input type="date" id="todo-date" title="Data de vencimento (opcional)">
+                    
                     <button class="btn-add" id="add-btn">
-                        <i data-lucide="plus" size="18"></i>
                         <span>Adicionar</span>
                     </button>
                 </div>
             </section>
 
             <section class="content-scroll">
-                <ul class="todo-list" id="todo-list">
-                    <!-- Tasks here -->
-                </ul>
-
+                <ul class="todo-list" id="todo-list"></ul>
                 <div id="empty-state" class="empty-state" style="display: none;">
                     <i data-lucide="sparkles" size="40" style="margin-bottom: 16px; opacity: 0.5;"></i>
-                    <p>Tudo limpo por aqui! Aproveite seu dia.</p>
+                    <p>Tudo limpo por aqui!</p>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
-        // --- Estado ---
-        let todos = JSON.parse(localStorage.getItem('tasks_v3_pro')) || [];
+        let todos = JSON.parse(localStorage.getItem('tasks_v4_pro')) || [];
         let currentFilter = 'all';
-        let currentTheme = localStorage.getItem('taskflow_theme') || 'gray'; 
+        let currentTheme = localStorage.getItem('taskflow_theme') || 'gray';
 
-        // --- Seletores ---
         const input = document.getElementById('todo-input');
+        const inputDate = document.getElementById('todo-date');
         const addBtn = document.getElementById('add-btn');
         const todoList = document.getElementById('todo-list');
         const dateDisplay = document.getElementById('current-date');
@@ -553,47 +544,49 @@
         const progressFill = document.getElementById('progress-fill');
         const progressPercent = document.getElementById('progress-percent');
         const countSummary = document.getElementById('count-summary');
-        
         const themeToggle = document.getElementById('theme-toggle');
-        const themeName = document.getElementById('theme-name');
-        const themeIcon = document.getElementById('theme-icon');
 
-        // --- Gerenciamento de Tema ---
-        function applyTheme(theme) {
-            document.body.classList.remove('theme-light');
+        // --- Gerenciamento de Datas (Auxiliares) ---
+        function formatDateRelatively(dateStr) {
+            if (!dateStr) return null;
+            const d = new Date(dateStr + 'T12:00:00'); // Forçar meio dia para evitar erro de timezone
+            const today = new Date();
+            today.setHours(0,0,0,0);
             
-            if (theme === 'light') {
-                document.body.classList.add('theme-light');
-                themeName.innerText = "Modo Escuro";
-                themeIcon.setAttribute('data-lucide', 'moon');
-            } else {
-                themeName.innerText = "Modo Claro";
-                themeIcon.setAttribute('data-lucide', 'sun');
+            const diffTime = d - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) return "hoje";
+            if (diffDays === 1) return "amanhã";
+            if (diffDays === -1) return "ontem";
+            if (diffDays > 1 && diffDays < 7) {
+                const dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                return dias[d.getDay()];
             }
+            return d.toLocaleDateString('pt-BR');
+        }
+
+        function formatCreationDate(dateIso) {
+            const d = new Date(dateIso);
+            const today = new Date();
+            if (d.toDateString() === today.toDateString()) return "hoje";
+            return d.toLocaleDateString('pt-BR');
+        }
+
+        // --- Lógica Principal ---
+        function applyTheme(theme) {
+            document.body.classList.toggle('theme-light', theme === 'light');
+            const themeName = document.getElementById('theme-name');
+            const themeIcon = document.getElementById('theme-icon');
+            themeName.innerText = theme === 'light' ? "Modo Escuro" : "Modo Claro";
+            themeIcon.setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun');
             localStorage.setItem('taskflow_theme', theme);
             currentTheme = theme;
             lucide.createIcons();
         }
 
-        themeToggle.addEventListener('click', () => {
-            if (currentTheme === 'gray') applyTheme('light');
-            else applyTheme('gray');
-        });
+        themeToggle.addEventListener('click', () => applyTheme(currentTheme === 'gray' ? 'light' : 'gray'));
 
-        // --- Init ---
-        function init() {
-            renderDate();
-            applyTheme(currentTheme);
-            renderTodos();
-            lucide.createIcons();
-        }
-
-        function renderDate() {
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            dateDisplay.innerText = new Date().toLocaleDateString('pt-BR', options);
-        }
-
-        // --- Funções ---
         function addTodo() {
             const text = input.value.trim();
             if (!text) return;
@@ -601,12 +594,15 @@
             const newTodo = {
                 id: Date.now(),
                 text: text,
-                completed: false
+                completed: false,
+                createdAt: new Date().toISOString(), // Automático
+                dueDate: inputDate.value || null      // Opcional
             };
 
             todos.unshift(newTodo);
             save();
             input.value = '';
+            inputDate.value = '';
             renderTodos();
         }
 
@@ -622,26 +618,12 @@
             renderTodos();
         }
 
-        function editTodo(id) {
-            const todo = todos.find(t => t.id === id);
-            if (!todo) return;
-
-            const newText = prompt("Editar tarefa:", todo.text);
-            
-            if (newText !== null && newText.trim() !== "") {
-                todos = todos.map(t => t.id === id ? { ...t, text: newText.trim() } : t);
-                save();
-                renderTodos();
-            }
-        }
-
         function save() {
-            localStorage.setItem('tasks_v3_pro', JSON.stringify(todos));
+            localStorage.setItem('tasks_v4_pro', JSON.stringify(todos));
         }
 
         function renderTodos() {
             todoList.innerHTML = '';
-            
             const filtered = todos.filter(t => {
                 if (currentFilter === 'pending') return !t.completed;
                 if (currentFilter === 'completed') return t.completed;
@@ -663,18 +645,30 @@
                 filtered.forEach(todo => {
                     const li = document.createElement('li');
                     li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                    
+                    const dueText = formatDateRelatively(todo.dueDate);
+                    const createdText = formatCreationDate(todo.createdAt);
+                    const isUrgent = dueText === 'hoje' || dueText === 'amanhã';
+
                     li.innerHTML = `
                         <div class="checkbox" onclick="toggleTodo(${todo.id})">
                             <i data-lucide="check" size="14"></i>
                         </div>
                         <div class="task-content">
                             <div class="task-title">${todo.text}</div>
+                            <div class="task-meta">
+                                <span class="meta-item">
+                                    <i data-lucide="calendar-plus" size="10"></i> Criado ${createdText}
+                                </span>
+                                ${todo.dueDate ? `
+                                    <span class="meta-item ${isUrgent ? 'due-soon' : ''}">
+                                        <i data-lucide="calendar" size="10"></i> Vence ${dueText}
+                                    </span>
+                                ` : ''}
+                            </div>
                         </div>
                         <div class="task-actions">
-                            <button class="action-btn edit" onclick="editTodo(${todo.id})" title="Editar texto">
-                                <i data-lucide="pencil" size="14"></i>
-                            </button>
-                            <button class="action-btn del" onclick="deleteTodo(${todo.id})" title="Excluir tarefa">
+                            <button class="action-btn del" onclick="deleteTodo(${todo.id})">
                                 <i data-lucide="trash-2" size="14"></i>
                             </button>
                         </div>
@@ -694,15 +688,16 @@
                 filterBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = btn.getAttribute('data-filter');
-                
-                const labels = { all: 'Todas as Tarefas', pending: 'Pendentes', completed: 'Concluídas' };
-                filterTitle.innerText = labels[currentFilter];
-                
+                filterTitle.innerText = { all: 'Todas as Tarefas', pending: 'Pendentes', completed: 'Concluídas' }[currentFilter];
                 renderTodos();
             });
         });
 
-        init();
+        // Init
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        dateDisplay.innerText = new Date().toLocaleDateString('pt-BR', options);
+        applyTheme(currentTheme);
+        renderTodos();
     </script>
 </body>
 </html>
