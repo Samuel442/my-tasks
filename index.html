@@ -86,10 +86,13 @@
 
         .logo-section { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
         .logo-icon { width: 32px; height: 32px; background: var(--accent-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        
         .logo-text { 
             font-size: 20px; font-weight: 800; 
             background: linear-gradient(to right, var(--text-main), var(--accent-primary)); 
-            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; 
+            -webkit-background-clip: text; 
+            background-clip: text; /* Correção de compatibilidade */
+            -webkit-text-fill-color: transparent; 
         }
 
         .nav-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 24px 0 12px 8px; }
@@ -108,7 +111,7 @@
         .progress-bar { height: 4px; background: rgba(0,0,0,0.1); border-radius: 2px; margin: 8px 0; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--accent-primary); width: 0%; transition: 0.5s; }
 
-        /* MAIN CONTENT */
+        /* MAIN */
         main { display: flex; flex-direction: column; background: var(--main-bg); overflow: hidden; }
         header { padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; }
         
@@ -117,7 +120,7 @@
         .input-section { padding: 0 48px 32px; }
         .input-container { 
             background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px; 
-            padding: 8px 8px 8px 20px; display: flex; align-items: center; gap: 12px; 
+            padding: 8px 8px 8px 20px; display: flex; align-items: center; gap: 12px; transition: 0.3s;
         }
         .input-container:focus-within { border-color: var(--accent-primary); box-shadow: 0 0 15px var(--accent-glow); }
         .input-container input[type="text"] { flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-size: 16px; }
@@ -131,13 +134,13 @@
         .todo-item { 
             background: var(--card-bg); border: 1px solid var(--border); margin-bottom: 12px; 
             padding: 16px 24px; border-radius: var(--radius-md); display: flex; align-items: center; 
-            gap: 16px; transition: 0.2s; position: relative;
+            gap: 16px; transition: 0.2s; position: relative; animation: slideIn 0.3s ease-out;
         }
-        /* ESTILO PARA ITEM SELECIONADO VIA TECLADO */
-        .todo-item.selected { border-color: var(--accent-primary); background: var(--item-hover); box-shadow: 0 0 10px var(--accent-glow); }
-        .todo-item.selected::before { content: '➔'; position: absolute; left: 6px; font-size: 12px; color: var(--accent-primary); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .checkbox { width: 22px; height: 22px; border: 2px solid var(--accent-primary); border-radius: 50%; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .todo-item.selected { border-color: var(--accent-primary); background: var(--item-hover); box-shadow: 0 0 10px var(--accent-glow); }
+
+        .checkbox { width: 22px; height: 22px; border: 2px solid var(--accent-primary); border-radius: 50%; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
         .completed .checkbox { background: var(--accent-primary); }
         .completed .task-title { text-decoration: line-through; opacity: 0.5; }
 
@@ -155,6 +158,7 @@
             aside { display: none; }
             header, .input-section, .content-scroll { padding: 20px; }
             .input-container { flex-wrap: wrap; }
+            .input-container input[type="text"] { width: 100%; }
         }
     </style>
 </head>
@@ -174,8 +178,8 @@
             </nav>
 
             <div class="shortcut-legend">
-                <p style="font-weight: 700; margin-bottom: 8px; text-transform: uppercase;">Atalhos</p>
-                <div class="shortcut-item"><span>Focar</span> <span class="key">Ctrl + K</span></div>
+                <p style="font-weight: 700; margin-bottom: 8px; text-transform: uppercase;">Teclado</p>
+                <div class="shortcut-item"><span>Buscar/Add</span> <span class="key">Ctrl + K</span></div>
                 <div class="shortcut-item"><span>Navegar</span> <span class="key">↑ ↓</span></div>
                 <div class="shortcut-item"><span>Concluir</span> <span class="key">Espaço</span></div>
                 <div class="shortcut-item"><span>Apagar</span> <span class="key">Del</span></div>
@@ -204,8 +208,9 @@
 
             <section class="input-section">
                 <div class="input-container">
-                    <input type="text" id="todo-input" placeholder="O que precisa ser feito?" autocomplete="off">
-                    <input type="date" id="todo-date">
+                    <i data-lucide="search" size="18" color="#94a3b8" id="input-icon"></i>
+                    <input type="text" id="todo-input" placeholder="Pesquise ou adicione uma tarefa..." autocomplete="off">
+                    <input type="date" id="todo-date" title="Data de vencimento">
                     <button class="btn-add" id="add-btn">Adicionar</button>
                 </div>
             </section>
@@ -214,7 +219,7 @@
                 <ul id="todo-list" style="list-style: none;"></ul>
                 <div id="empty-state" class="empty-state">
                     <i data-lucide="sparkles" size="40"></i>
-                    <p style="margin-top: 10px;">Produtividade máxima!</p>
+                    <p style="margin-top: 10px;" id="empty-text">Nenhuma tarefa encontrada.</p>
                 </div>
             </section>
         </main>
@@ -225,7 +230,8 @@
         let todos = JSON.parse(localStorage.getItem('tasks_v4_pro')) || [];
         let currentFilter = 'all';
         let currentTheme = localStorage.getItem('taskflow_theme') || 'gray';
-        let selectedIndex = -1; // Para navegação via teclado
+        let searchTerm = "";
+        let selectedIndex = -1;
 
         const input = document.getElementById('todo-input');
         const inputDate = document.getElementById('todo-date');
@@ -234,6 +240,19 @@
         const themeToggle = document.getElementById('theme-toggle');
 
         function save() { localStorage.setItem('tasks_v4_pro', JSON.stringify(todos)); }
+
+        // --- BUSCA (Filtro Dinâmico) ---
+        input.addEventListener('input', (e) => {
+            searchTerm = e.target.value.toLowerCase();
+            selectedIndex = -1; // Reseta seleção ao buscar
+            render();
+            
+            // Troca ícone se estiver digitando
+            const icon = document.getElementById('input-icon');
+            if(searchTerm.length > 0) icon.setAttribute('data-lucide', 'filter');
+            else icon.setAttribute('data-lucide', 'search');
+            lucide.createIcons();
+        });
 
         // --- TEMA ---
         function applyTheme(theme) {
@@ -245,7 +264,7 @@
             lucide.createIcons();
         }
 
-        // --- LÓGICA DE DATAS ---
+        // --- DATAS ---
         function getDueLabel(dateStr) {
             if (!dateStr) return null;
             const d = new Date(dateStr + 'T12:00:00');
@@ -260,13 +279,18 @@
         // --- RENDERIZAÇÃO ---
         function render() {
             todoList.innerHTML = '';
+            
+            // Aplica todos os filtros: Texto + Categoria (Todas/Pendentes/Concluídas)
             const filtered = todos.filter(t => {
-                if (currentFilter === 'pending') return !t.completed;
-                if (currentFilter === 'completed') return t.completed;
-                return true;
+                const matchesSearch = t.text.toLowerCase().includes(searchTerm);
+                const matchesCategory = (currentFilter === 'all') || 
+                                       (currentFilter === 'pending' && !t.completed) || 
+                                       (currentFilter === 'completed' && t.completed);
+                return matchesSearch && matchesCategory;
             });
 
             document.getElementById('empty-state').style.display = filtered.length ? 'none' : 'block';
+            document.getElementById('empty-text').innerText = searchTerm ? "Nenhum resultado para sua busca." : "Produtividade máxima!";
 
             filtered.forEach((t, index) => {
                 const li = document.createElement('li');
@@ -280,7 +304,7 @@
                     <div class="task-content">
                         <span class="task-title">${t.text}</span>
                         <div class="task-meta">
-                            <span><i data-lucide="calendar-plus" size="10"></i> ${createdDate}</span>
+                            <span><i data-lucide="calendar-plus" size="10"></i> Criado ${createdDate}</span>
                             ${due ? `<span class="${due.urgent ? 'due-soon' : ''}"><i data-lucide="calendar-clock" size="10"></i> ${due.text}</span>` : ''}
                         </div>
                     </div>
@@ -302,9 +326,16 @@
         function addTodo() {
             const text = input.value.trim();
             if (!text) return;
+            
+            // Adiciona nova tarefa
             todos.unshift({ id: Date.now(), text, completed: false, createdAt: new Date().toISOString(), dueDate: inputDate.value || null });
-            input.value = ''; inputDate.value = '';
+            
+            // Limpa tudo após adicionar
+            input.value = ''; 
+            inputDate.value = '';
+            searchTerm = "";
             selectedIndex = -1;
+            
             save(); render();
         }
 
@@ -319,49 +350,21 @@
             save(); render();
         }
 
-        // --- ATALHOS DE TECLADO ---
+        // --- TECLADO ---
         document.addEventListener('keydown', (e) => {
-            // Focar input: Ctrl + K
-            if (e.ctrlKey && e.key === 'k') {
-                e.preventDefault();
-                input.focus();
-            }
+            if (e.ctrlKey && e.key === 'k') { e.preventDefault(); input.focus(); }
 
-            // Se o input não estiver focado, habilitar atalhos de navegação
             if (document.activeElement !== input) {
-                const filteredCount = todoList.children.length;
+                const filtered = todos.filter(t => {
+                    const matchesSearch = t.text.toLowerCase().includes(searchTerm);
+                    const matchesCategory = (currentFilter === 'all') || (currentFilter === 'pending' && !t.completed) || (currentFilter === 'completed' && t.completed);
+                    return matchesSearch && matchesCategory;
+                });
 
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    selectedIndex = (selectedIndex + 1) % filteredCount;
-                    render();
-                }
-
-                if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    selectedIndex = (selectedIndex - 1 + filteredCount) % filteredCount;
-                    render();
-                }
-
-                if (e.key === ' ' && selectedIndex !== -1) { // Espaço: Concluir
-                    e.preventDefault();
-                    const filtered = todos.filter(t => {
-                        if (currentFilter === 'pending') return !t.completed;
-                        if (currentFilter === 'completed') return t.completed;
-                        return true;
-                    });
-                    toggleTodo(filtered[selectedIndex].id);
-                }
-
-                if (e.key === 'Delete' && selectedIndex !== -1) { // Delete: Apagar
-                    e.preventDefault();
-                    const filtered = todos.filter(t => {
-                        if (currentFilter === 'pending') return !t.completed;
-                        if (currentFilter === 'completed') return t.completed;
-                        return true;
-                    });
-                    deleteTodo(filtered[selectedIndex].id);
-                }
+                if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = (selectedIndex + 1) % filtered.length; render(); }
+                if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = (selectedIndex - 1 + filtered.length) % filtered.length; render(); }
+                if (e.key === ' ' && selectedIndex !== -1) { e.preventDefault(); toggleTodo(filtered[selectedIndex].id); }
+                if (e.key === 'Delete' && selectedIndex !== -1) { e.preventDefault(); deleteTodo(filtered[selectedIndex].id); }
             }
         });
 
@@ -381,7 +384,7 @@
             });
         });
 
-        // Inicialização
+        // Init
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
         applyTheme(currentTheme);
         render();
