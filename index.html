@@ -105,13 +105,18 @@
         .filter-btn:hover { background: var(--item-hover); color: var(--text-main); }
         .filter-btn.active { background: var(--accent-glow); color: var(--accent-primary); font-weight: 600; }
 
-        /* CONTADORES NO MENU (BADGES) */
-        .count-badge {
-            font-size: 10px; background: rgba(0,0,0,0.2); 
-            padding: 2px 8px; border-radius: 10px; color: var(--text-muted);
-            font-weight: 700;
-        }
+        .count-badge { font-size: 10px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 10px; color: var(--text-muted); font-weight: 700; }
         .active .count-badge { background: var(--accent-primary); color: white; }
+
+        /* DATA ACTIONS */
+        .data-actions { display: flex; gap: 8px; margin-top: 8px; padding: 0 8px; }
+        .data-btn { 
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 8px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--card-bg); color: var(--text-muted); font-size: 11px;
+            cursor: pointer; transition: 0.2s;
+        }
+        .data-btn:hover { background: var(--item-hover); color: var(--text-main); border-color: var(--accent-primary); }
 
         .shortcut-legend { margin-top: 20px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 8px; font-size: 10px; color: var(--text-muted); }
         .shortcut-item { display: flex; justify-content: space-between; margin-bottom: 4px; }
@@ -124,7 +129,6 @@
         /* MAIN */
         main { display: flex; flex-direction: column; background: var(--main-bg); overflow: hidden; }
         header { padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; }
-        
         .theme-toggle-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 8px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; }
 
         .input-section { padding: 0 48px 32px; }
@@ -231,6 +235,17 @@
                 </button>
             </nav>
 
+            <div class="nav-label">Backup</div>
+            <div class="data-actions">
+                <button class="data-btn" onclick="exportTasks()" title="Exportar para arquivo">
+                    <i data-lucide="download" size="14"></i> Exportar
+                </button>
+                <button class="data-btn" onclick="document.getElementById('import-file').click()" title="Importar de arquivo">
+                    <i data-lucide="upload" size="14"></i> Importar
+                </button>
+                <input type="file" id="import-file" style="display: none" accept=".json">
+            </div>
+
             <div class="shortcut-legend">
                 <p style="font-weight: 700; margin-bottom: 8px; text-transform: uppercase;">Teclado</p>
                 <div class="shortcut-item"><span>Buscar/Add</span> <span class="key">Ctrl + K</span></div>
@@ -273,13 +288,14 @@
                 <ul id="todo-list" style="list-style: none;"></ul>
                 <div id="empty-state" class="empty-state">
                     <i data-lucide="sparkles" size="40"></i>
-                    <p style="margin-top: 10px;" id="empty-text">Nenhuma tarefa encontrada.</p>
+                    <p style="margin-top: 10px;" id="empty-text">Tudo organizado!</p>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
+        // --- ESTADO ---
         let todos = JSON.parse(localStorage.getItem('tasks_v4_pro')) || [];
         let currentFilter = 'all';
         let currentTheme = localStorage.getItem('taskflow_theme') || 'gray';
@@ -293,27 +309,60 @@
         const todoList = document.getElementById('todo-list');
         const themeToggle = document.getElementById('theme-toggle');
         const modal = document.getElementById('delete-modal');
+        const fileInput = document.getElementById('import-file');
 
         function save() { localStorage.setItem('tasks_v4_pro', JSON.stringify(todos)); }
 
+        // --- BACKUP (EXPORT/IMPORT) ---
+        function exportTasks() {
+            if (todos.length === 0) return alert("Não há tarefas para exportar.");
+            const data = JSON.stringify(todos, null, 2);
+            const blob = new Blob([data], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup-taskflow-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (Array.isArray(imported)) {
+                        if (confirm(`Deseja importar ${imported.length} tarefas? Isso substituirá sua lista atual.`)) {
+                            todos = imported;
+                            save(); render();
+                        }
+                    } else { alert("Arquivo JSON inválido."); }
+                } catch (err) { alert("Erro ao ler o arquivo."); }
+            };
+            reader.readAsText(file);
+        });
+
+        // --- BUSCA ---
         input.addEventListener('input', (e) => {
             searchTerm = e.target.value.toLowerCase();
-            selectedIndex = -1;
-            render();
+            selectedIndex = -1; render();
             const icon = document.getElementById('input-icon');
             icon.setAttribute('data-lucide', searchTerm.length > 0 ? 'filter' : 'search');
             lucide.createIcons();
         });
 
+        // --- TEMA ---
         function applyTheme(theme) {
             document.body.classList.toggle('theme-light', theme === 'light');
             document.getElementById('theme-name').innerText = theme === 'light' ? "Modo Escuro" : "Modo Claro";
             document.getElementById('theme-icon').setAttribute('data-lucide', theme === 'light' ? 'moon' : 'sun');
             localStorage.setItem('taskflow_theme', theme);
-            currentTheme = theme;
-            lucide.createIcons();
+            currentTheme = theme; lucide.createIcons();
         }
 
+        // --- DATAS ---
         function getDueLabel(dateStr) {
             if (!dateStr) return null;
             const d = new Date(dateStr + 'T12:00:00');
@@ -327,27 +376,22 @@
 
         // --- RENDERIZAÇÃO ---
         function render() {
-            // Atualiza Contadores do Menu
+            // Contadores
             const allCount = todos.length;
             const pendingCount = todos.filter(t => !t.completed).length;
             const completedCount = todos.filter(t => t.completed).length;
-
             document.getElementById('count-all').innerText = allCount;
             document.getElementById('count-pending').innerText = pendingCount;
             document.getElementById('count-completed').innerText = completedCount;
 
-            // Atualiza Título com o número da categoria atual
-            const titles = { all: "Todas as Tarefas", pending: "Tarefas Pendentes", completed: "Tarefas Concluídas" };
+            const titles = { all: "Todas", pending: "Pendentes", completed: "Concluídas" };
             const currentCount = currentFilter === 'all' ? allCount : (currentFilter === 'pending' ? pendingCount : completedCount);
             document.getElementById('filter-title').innerText = `${titles[currentFilter]} (${currentCount})`;
 
             todoList.innerHTML = '';
-            
             let filtered = todos.filter(t => {
                 const matchesSearch = t.text.toLowerCase().includes(searchTerm);
-                const matchesCategory = (currentFilter === 'all') || 
-                                       (currentFilter === 'pending' && !t.completed) || 
-                                       (currentFilter === 'completed' && t.completed);
+                const matchesCategory = (currentFilter === 'all') || (currentFilter === 'pending' && !t.completed) || (currentFilter === 'completed' && t.completed);
                 return matchesSearch && matchesCategory;
             });
 
@@ -357,12 +401,11 @@
             });
 
             document.getElementById('empty-state').style.display = filtered.length ? 'none' : 'block';
-            document.getElementById('empty-text').innerText = searchTerm ? "Nada encontrado." : "Tudo pronto por hoje!";
+            document.getElementById('empty-text').innerText = searchTerm ? "Nada encontrado." : "Tudo organizado!";
 
             filtered.forEach((t, index) => {
                 const li = document.createElement('li');
                 li.className = `todo-item ${t.completed ? 'completed' : ''} ${index === selectedIndex ? 'selected' : ''}`;
-                
                 const due = getDueLabel(t.dueDate);
                 const createdDate = new Date(t.createdAt).toLocaleDateString('pt-BR');
 
@@ -371,7 +414,7 @@
                     <div class="task-content">
                         <span class="task-title">${t.text}</span>
                         <div class="task-meta">
-                            <span><i data-lucide="calendar-plus" size="10"></i> Criado ${createdDate}</span>
+                            <span><i data-lucide="calendar-plus" size="10"></i> ${createdDate}</span>
                             ${due ? `<span class="${due.urgent ? 'due-soon' : ''}"><i data-lucide="calendar-clock" size="10"></i> ${due.text}</span>` : ''}
                         </div>
                     </div>
@@ -388,22 +431,22 @@
             lucide.createIcons();
         }
 
+        // --- MODAL ---
         function askDeleteTodo(id) {
             taskIdToDelete = id;
             const task = todos.find(t => t.id === id);
             document.getElementById('modal-task-name').innerText = `Deseja excluir "${task.text}"?`;
             modal.style.display = 'flex';
         }
-
         document.getElementById('modal-cancel').onclick = () => { modal.style.display = 'none'; taskIdToDelete = null; };
         document.getElementById('modal-confirm').onclick = () => {
             if (taskIdToDelete) {
                 todos = todos.filter(t => t.id !== taskIdToDelete);
-                save(); render();
-                modal.style.display = 'none'; taskIdToDelete = null; selectedIndex = -1;
+                save(); render(); modal.style.display = 'none'; taskIdToDelete = null; selectedIndex = -1;
             }
         };
 
+        // --- AÇÕES ---
         function addTodo() {
             const text = input.value.trim();
             if (!text) return;
@@ -411,16 +454,15 @@
             input.value = ''; inputDate.value = ''; searchTerm = ""; selectedIndex = -1;
             save(); render();
         }
-
         function toggleTodo(id) {
             todos = todos.map(t => t.id === id ? {...t, completed: !t.completed} : t);
             save(); render();
         }
 
+        // --- TECLADO ---
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') document.getElementById('modal-cancel').onclick();
             if (e.ctrlKey && e.key === 'k') { e.preventDefault(); input.focus(); }
-
             if (document.activeElement !== input && modal.style.display !== 'flex') {
                 let filtered = todos.filter(t => {
                     const matchesSearch = t.text.toLowerCase().includes(searchTerm);
@@ -428,7 +470,6 @@
                     return matchesSearch && matchesCategory;
                 });
                 filtered.sort((a,b) => (a.completed === b.completed) ? new Date(b.createdAt) - new Date(a.createdAt) : (a.completed ? 1 : -1));
-
                 if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = (selectedIndex + 1) % filtered.length; render(); }
                 if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = (selectedIndex - 1 + filtered.length) % filtered.length; render(); }
                 if (e.key === ' ' && selectedIndex !== -1) { e.preventDefault(); toggleTodo(filtered[selectedIndex].id); }
@@ -436,22 +477,19 @@
             }
         });
 
+        // LISTENERS
         addBtn.addEventListener('click', addTodo);
         input.addEventListener('keypress', e => e.key === 'Enter' && addTodo());
         themeToggle.addEventListener('click', () => applyTheme(currentTheme === 'gray' ? 'light' : 'gray'));
-        
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentFilter = btn.dataset.filter;
-                render();
+                btn.classList.add('active'); currentFilter = btn.dataset.filter; render();
             });
         });
 
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-        applyTheme(currentTheme);
-        render();
+        applyTheme(currentTheme); render();
     </script>
 </body>
 </html>
