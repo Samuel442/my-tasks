@@ -144,7 +144,7 @@
         .btn-add:hover { filter: brightness(1.1); transform: scale(1.02); }
 
         /* LISTA */
-        .content-scroll { flex: 1; overflow-y: auto; padding: 0 48px 40px; }
+        .content-scroll { flex: 1; overflow-y: auto; padding: 0 48px 40px; scroll-behavior: smooth; }
         .todo-item { 
             background: var(--card-bg); border: 1px solid var(--border); margin-bottom: 12px; 
             padding: 16px 24px; border-radius: var(--radius-md); display: flex; align-items: center; 
@@ -283,7 +283,7 @@
                 </div>
             </section>
 
-            <section class="content-scroll">
+            <section class="content-scroll" id="scroll-container">
                 <ul id="todo-list" style="list-style: none;"></ul>
                 <div id="empty-state" class="empty-state">
                     <i data-lucide="sparkles" size="40"></i>
@@ -306,6 +306,7 @@
         const inputDate = document.getElementById('todo-date');
         const addBtn = document.getElementById('add-btn');
         const todoList = document.getElementById('todo-list');
+        const scrollContainer = document.getElementById('scroll-container');
         const themeToggle = document.getElementById('theme-toggle');
         const modal = document.getElementById('delete-modal');
         const fileInput = document.getElementById('import-file');
@@ -332,10 +333,7 @@
             reader.onload = (event) => {
                 try {
                     const imported = JSON.parse(event.target.result);
-                    if (Array.isArray(imported)) {
-                        todos = imported;
-                        save(); render();
-                    }
+                    if (Array.isArray(imported)) { todos = imported; save(); render(); }
                 } catch (err) { console.error("Erro importação"); }
             };
             reader.readAsText(file);
@@ -397,7 +395,7 @@
             });
 
             document.getElementById('empty-state').style.display = filtered.length ? 'none' : 'block';
-            document.getElementById('empty-text').innerText = searchTerm ? "Nada encontrado." : "Tudo organizado!";
+            document.getElementById('empty-text').innerText = searchTerm ? "Nada encontrado." : "Tudo pronto por hoje!";
 
             filtered.forEach((t, index) => {
                 const li = document.createElement('li');
@@ -449,7 +447,10 @@
             todos.unshift({ id: Date.now(), text, completed: false, createdAt: new Date().toISOString(), dueDate: inputDate.value || null });
             input.value = ''; inputDate.value = ''; searchTerm = ""; selectedIndex = -1;
             save(); render();
-            input.focus(); // Retorna o foco após adicionar
+            input.focus();
+            
+            // 11️⃣ SCROLL AUTOMÁTICO SUAVE
+            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
         }
         function toggleTodo(id) {
             todos = todos.map(t => t.id === id ? {...t, completed: !t.completed} : t);
@@ -482,14 +483,13 @@
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active'); currentFilter = btn.dataset.filter; render();
+                // Scroll para o topo ao trocar categoria
+                scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
 
-        // --- INICIALIZAÇÃO DEFINITIVA ---
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-        applyTheme(currentTheme); 
-        render();
-        input.focus(); // AUTOFOCUS NO INÍCIO
+        applyTheme(currentTheme); render(); input.focus();
     </script>
 </body>
 </html>
