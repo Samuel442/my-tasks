@@ -30,7 +30,6 @@
             --input-bg: rgba(0, 0, 0, 0.2);
             --danger: #ef4444;
             --warning: #f59e0b;
-            --tag-bg: rgba(59, 130, 246, 0.15);
         }
 
         body.theme-light {
@@ -45,7 +44,6 @@
             --item-hover: #f1f5f9;
             --card-bg: #ffffff;
             --input-bg: #ffffff;
-            --tag-bg: rgba(37, 99, 235, 0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -85,10 +83,9 @@
             background: rgba(0, 0, 0, 0.05);
             border-right: 1px solid var(--border);
             display: flex; flex-direction: column; padding: 32px 24px;
-            overflow-y: auto;
         }
 
-        .logo-section { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; flex-shrink: 0; }
+        .logo-section { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
         .logo-icon { width: 32px; height: 32px; background: var(--accent-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
         .logo-text { 
             font-size: 20px; font-weight: 800; 
@@ -111,15 +108,6 @@
         .count-badge { font-size: 10px; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 10px; color: var(--text-muted); font-weight: 700; }
         .active .count-badge { background: var(--accent-primary); color: white; }
 
-        /* TAGS NA SIDEBAR */
-        #sidebar-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 8px; }
-        .tag-pill-sidebar { 
-            font-size: 10px; padding: 4px 10px; background: var(--card-bg); 
-            border: 1px solid var(--border); border-radius: 20px; cursor: pointer; color: var(--text-muted);
-            transition: 0.2s;
-        }
-        .tag-pill-sidebar:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
-
         .data-actions { display: flex; gap: 8px; margin-top: 8px; padding: 0 8px; }
         .data-btn { 
             flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -133,7 +121,7 @@
         .shortcut-item { display: flex; justify-content: space-between; margin-bottom: 4px; }
         .key { background: var(--border); padding: 2px 4px; border-radius: 4px; color: var(--text-main); font-family: monospace; }
 
-        .stats-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-top: 20px; flex-shrink: 0; }
+        .stats-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-top: auto; }
         .progress-bar { height: 4px; background: rgba(0,0,0,0.1); border-radius: 2px; margin: 8px 0; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--accent-primary); width: 0%; transition: 0.5s; }
 
@@ -141,6 +129,17 @@
         main { display: flex; flex-direction: column; background: var(--main-bg); overflow: hidden; }
         header { padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; }
         .theme-toggle-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 8px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12px; }
+
+        /* AVISO DE SOBRECARGA */
+        .load-warning {
+            margin: 0 48px 12px; padding: 10px 20px; border-radius: 10px;
+            font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 10px;
+            animation: slideDown 0.3s ease;
+        }
+        .load-warning.show { display: flex; }
+        .load-warning.level-medium { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .load-warning.level-high { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         .input-section { padding: 0 48px 32px; }
         .input-container { 
@@ -153,6 +152,7 @@
         body.theme-light .input-container input[type="date"] { color-scheme: light; }
 
         .btn-add { background: var(--accent-primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-add:hover { filter: brightness(1.1); transform: scale(1.02); }
 
         /* LISTA */
         .content-scroll { flex: 1; overflow-y: auto; padding: 0 48px 40px; scroll-behavior: smooth; }
@@ -172,17 +172,7 @@
         .completed .task-title { text-decoration: line-through; color: var(--text-muted); }
 
         .task-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-        
-        /* ESTILO DAS TAGS NA TAREFA */
-        .tag-pill {
-            display: inline-block; padding: 2px 8px; border-radius: 6px;
-            background: var(--tag-bg); color: var(--accent-primary);
-            font-size: 10px; font-weight: 700; margin-right: 4px; cursor: pointer;
-            transition: 0.2s;
-        }
-        .tag-pill:hover { filter: brightness(1.2); }
-
-        .task-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); align-items: center; margin-top: 4px; }
+        .task-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); align-items: center; }
         .due-soon { color: var(--warning); font-weight: 600; }
 
         /* MODAL */
@@ -214,7 +204,8 @@
         @media (max-width: 900px) {
             .dashboard-container { grid-template-columns: 1fr; height: 95vh; }
             aside { display: none; }
-            header, .input-section, .content-scroll { padding: 20px; }
+            header, .load-warning, .input-section, .content-scroll { padding-left: 20px; padding-right: 20px; }
+            .load-warning { margin: 0 20px 12px; }
         }
     </style>
 </head>
@@ -239,10 +230,9 @@
                 <div class="logo-icon"><i data-lucide="zap" size="18" color="white"></i></div>
                 <span class="logo-text">TaskFlow</span>
             </div>
-            
-            <nav>
+            <nav id="filter-nav">
                 <div class="nav-label">Menu</div>
-                <button class="filter-btn active" data-filter="all">
+                <button class="filter-btn" data-filter="all">
                     <div><i data-lucide="layers" size="18"></i> Todas</div>
                     <span class="count-badge" id="count-all">0</span>
                 </button>
@@ -256,17 +246,12 @@
                 </button>
             </nav>
 
-            <div class="nav-label">Tags Populares</div>
-            <div id="sidebar-tags">
-                <!-- Tags serão inseridas aqui via JS -->
-            </div>
-
             <div class="nav-label">Backup</div>
             <div class="data-actions">
-                <button class="data-btn" onclick="exportTasks()" title="Exportar tarefas">
+                <button class="data-btn" onclick="exportTasks()" title="Exportar">
                     <i data-lucide="download" size="14"></i>
                 </button>
-                <button class="data-btn" onclick="document.getElementById('import-file').click()" title="Importar tarefas">
+                <button class="data-btn" onclick="document.getElementById('import-file').click()" title="Importar">
                     <i data-lucide="upload" size="14"></i>
                 </button>
                 <input type="file" id="import-file" style="display: none" accept=".json">
@@ -274,7 +259,7 @@
 
             <div class="shortcut-legend">
                 <p style="font-weight: 700; margin-bottom: 8px; text-transform: uppercase;">Teclado</p>
-                <div class="shortcut-item"><span>Buscar</span> <span class="key">Ctrl + K</span></div>
+                <div class="shortcut-item"><span>Buscar/Add</span> <span class="key">Ctrl + K</span></div>
                 <div class="shortcut-item"><span>Navegar</span> <span class="key">↑ ↓</span></div>
                 <div class="shortcut-item"><span>Concluir</span> <span class="key">Espaço</span></div>
             </div>
@@ -300,10 +285,16 @@
                 </button>
             </header>
 
+            <!-- AVISO DE SOBRECARGA -->
+            <div class="load-warning" id="load-warning">
+                <i data-lucide="alert-circle" size="16"></i>
+                <span id="load-warning-text"></span>
+            </div>
+
             <section class="input-section">
                 <div class="input-container">
                     <i data-lucide="search" size="18" color="#94a3b8" id="input-icon"></i>
-                    <input type="text" id="todo-input" placeholder="Pesquise ou adicione (use # para tags)..." autocomplete="off">
+                    <input type="text" id="todo-input" placeholder="Pesquise ou adicione tarefas..." autocomplete="off">
                     <input type="date" id="todo-date">
                     <button class="btn-add" id="add-btn">Adicionar</button>
                 </div>
@@ -313,7 +304,7 @@
                 <ul id="todo-list" style="list-style: none;"></ul>
                 <div id="empty-state" class="empty-state">
                     <i data-lucide="sparkles" size="40"></i>
-                    <p style="margin-top: 10px;" id="empty-text">Tudo organizado!</p>
+                    <p style="margin-top: 10px;" id="empty-text">Tudo pronto por hoje!</p>
                 </div>
             </section>
         </main>
@@ -322,8 +313,8 @@
     <script>
         // --- ESTADO ---
         let todos = JSON.parse(localStorage.getItem('tasks_v4_pro')) || [];
-        let currentFilter = 'all';
         let currentTheme = localStorage.getItem('taskflow_theme') || 'gray';
+        let currentFilter = localStorage.getItem('taskflow_filter') || 'all';
         let searchTerm = "";
         let selectedIndex = -1;
         let taskIdToDelete = null;
@@ -336,9 +327,36 @@
         const themeToggle = document.getElementById('theme-toggle');
         const modal = document.getElementById('delete-modal');
         const fileInput = document.getElementById('import-file');
-        const sidebarTags = document.getElementById('sidebar-tags');
+        const loadWarning = document.getElementById('load-warning');
+        const loadWarningText = document.getElementById('load-warning-text');
 
         function save() { localStorage.setItem('tasks_v4_pro', JSON.stringify(todos)); }
+
+        // --- BACKUP ---
+        function exportTasks() {
+            if (todos.length === 0) return;
+            const data = JSON.stringify(todos, null, 2);
+            const blob = new Blob([data], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup-taskflow.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (Array.isArray(imported)) { todos = imported; save(); render(); }
+                } catch (err) { alert("JSON inválido"); }
+            };
+            reader.readAsText(file);
+        });
 
         // --- BUSCA ---
         input.addEventListener('input', (e) => {
@@ -347,35 +365,6 @@
             const icon = document.getElementById('input-icon');
             icon.setAttribute('data-lucide', searchTerm.length > 0 ? 'filter' : 'search');
             lucide.createIcons();
-        });
-
-        function filterByTag(tag) {
-            input.value = `#${tag}`;
-            searchTerm = `#${tag.toLowerCase()}`;
-            render();
-            input.focus();
-        }
-
-        // --- BACKUP ---
-        function exportTasks() {
-            const data = JSON.stringify(todos, null, 2);
-            const blob = new Blob([data], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `backup-tasks.json`;
-            a.click();
-        }
-
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                todos = JSON.parse(event.target.result);
-                save(); render();
-            };
-            reader.readAsText(file);
         });
 
         // --- TEMA ---
@@ -401,24 +390,25 @@
 
         // --- RENDERIZAÇÃO ---
         function render() {
-            // Contadores
+            const allCount = todos.length;
             const pendingCount = todos.filter(t => !t.completed).length;
             const completedCount = todos.filter(t => t.completed).length;
-            document.getElementById('count-all').innerText = todos.length;
+            document.getElementById('count-all').innerText = allCount;
             document.getElementById('count-pending').innerText = pendingCount;
             document.getElementById('count-completed').innerText = completedCount;
 
             const titles = { all: "Todas", pending: "Pendentes", completed: "Concluídas" };
-            document.getElementById('filter-title').innerText = `${titles[currentFilter]} (${currentFilter === 'all' ? todos.length : (currentFilter === 'pending' ? pendingCount : completedCount)})`;
+            document.getElementById('filter-title').innerText = `${titles[currentFilter]} (${currentFilter === 'all' ? allCount : (currentFilter === 'pending' ? pendingCount : completedCount)})`;
 
-            // Renderizar Sidebar Tags
-            const allTags = [];
-            todos.forEach(t => {
-                const tags = t.text.match(/#(\w+)/g);
-                if (tags) tags.forEach(tag => allTags.push(tag.replace('#', '')));
-            });
-            const uniqueTags = [...new Set(allTags)].slice(0, 10);
-            sidebarTags.innerHTML = uniqueTags.map(tag => `<span class="tag-pill-sidebar" onclick="filterByTag('${tag}')">#${tag}</span>`).join('');
+            // AVISO DE SOBRECARGA (GAMIFICAÇÃO)
+            if (pendingCount > 10) {
+                loadWarning.className = `load-warning show ${pendingCount > 20 ? 'level-high' : 'level-medium'}`;
+                loadWarningText.innerText = `Atenção: Você tem ${pendingCount} tarefas pendentes. Foco no essencial!`;
+            } else {
+                loadWarning.classList.remove('show');
+            }
+
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === currentFilter));
 
             todoList.innerHTML = '';
             let filtered = todos.filter(t => {
@@ -430,21 +420,19 @@
             filtered.sort((a, b) => (a.completed !== b.completed) ? (a.completed ? 1 : -1) : new Date(b.createdAt) - new Date(a.createdAt));
 
             document.getElementById('empty-state').style.display = filtered.length ? 'none' : 'block';
+            document.getElementById('empty-text').innerText = searchTerm ? "Nada encontrado." : "Tudo organizado!";
 
             filtered.forEach((t, index) => {
                 const li = document.createElement('li');
                 li.className = `todo-item ${t.completed ? 'completed' : ''} ${index === selectedIndex ? 'selected' : ''}`;
                 const due = getDueLabel(t.dueDate);
-                
-                // Extrair tags do texto para estilizar
-                const displayText = t.text.replace(/#(\w+)/g, '<span class="tag-pill" onclick="event.stopPropagation(); filterByTag(\'$1\')">#$1</span>');
 
                 li.innerHTML = `
                     <div class="checkbox" onclick="toggleTodo(${t.id})"><i data-lucide="check" size="12" color="white"></i></div>
                     <div class="task-content">
-                        <span class="task-title">${displayText}</span>
+                        <span class="task-title">${t.text}</span>
                         <div class="task-meta">
-                            <span><i data-lucide="calendar-plus" size="10"></i> ${new Date(t.createdAt).toLocaleDateString('pt-BR')}</span>
+                            <span><i data-lucide="calendar-plus" size="10"></i> Criado ${new Date(t.createdAt).toLocaleDateString('pt-BR')}</span>
                             ${due ? `<span class="${due.urgent ? 'due-soon' : ''}"><i data-lucide="calendar-clock" size="10"></i> ${due.text}</span>` : ''}
                         </div>
                     </div>
@@ -463,12 +451,16 @@
         // --- MODAL ---
         function askDeleteTodo(id) {
             taskIdToDelete = id;
+            const task = todos.find(t => t.id === id);
+            document.getElementById('modal-task-name').innerText = `Deseja excluir "${task.text}"?`;
             modal.style.display = 'flex';
         }
-        document.getElementById('modal-cancel').onclick = () => { modal.style.display = 'none'; input.focus(); };
+        document.getElementById('modal-cancel').onclick = () => { modal.style.display = 'none'; taskIdToDelete = null; input.focus(); };
         document.getElementById('modal-confirm').onclick = () => {
-            todos = todos.filter(t => t.id !== taskIdToDelete);
-            save(); render(); modal.style.display = 'none'; input.focus();
+            if (taskIdToDelete) {
+                todos = todos.filter(t => t.id !== taskIdToDelete);
+                save(); render(); modal.style.display = 'none'; taskIdToDelete = null; selectedIndex = -1; input.focus();
+            }
         };
 
         // --- AÇÕES ---
@@ -476,7 +468,7 @@
             const text = input.value.trim();
             if (!text) return;
             todos.unshift({ id: Date.now(), text, completed: false, createdAt: new Date().toISOString(), dueDate: inputDate.value || null });
-            input.value = ''; inputDate.value = ''; searchTerm = "";
+            input.value = ''; inputDate.value = ''; searchTerm = ""; selectedIndex = -1;
             save(); render();
             scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
             input.focus();
@@ -491,12 +483,17 @@
             if (e.key === 'Escape') document.getElementById('modal-cancel').onclick();
             if (e.ctrlKey && e.key === 'k') { e.preventDefault(); input.focus(); }
             if (document.activeElement !== input && modal.style.display !== 'flex') {
-                if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex++; render(); }
-                if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex--; render(); }
-                if (e.key === ' ' && selectedIndex !== -1) { 
-                    e.preventDefault();
-                    // Lógica para pegar o ID correto do item selecionado na lista filtrada
-                }
+                let filtered = todos.filter(t => {
+                    const ms = t.text.toLowerCase().includes(searchTerm);
+                    const mc = (currentFilter === 'all') || (currentFilter === 'pending' && !t.completed) || (currentFilter === 'completed' && t.completed);
+                    return ms && mc;
+                });
+                filtered.sort((a,b) => (a.completed === b.completed) ? new Date(b.createdAt) - new Date(a.createdAt) : (a.completed ? 1 : -1));
+
+                if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = (selectedIndex + 1) % filtered.length; render(); }
+                if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = (selectedIndex - 1 + filtered.length) % filtered.length; render(); }
+                if (e.key === ' ' && selectedIndex !== -1) { e.preventDefault(); toggleTodo(filtered[selectedIndex].id); }
+                if (e.key === 'Delete' && selectedIndex !== -1) { e.preventDefault(); askDeleteTodo(filtered[selectedIndex].id); }
             }
         });
 
@@ -506,13 +503,18 @@
         themeToggle.addEventListener('click', () => applyTheme(currentTheme === 'gray' ? 'light' : 'gray'));
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active'); currentFilter = btn.dataset.filter; render();
+                currentFilter = btn.dataset.filter;
+                localStorage.setItem('taskflow_filter', currentFilter);
+                render();
+                scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
 
+        // --- INIT ---
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-        applyTheme(currentTheme); render(); input.focus();
+        applyTheme(currentTheme); 
+        render(); 
+        input.focus();
     </script>
 </body>
 </html>
